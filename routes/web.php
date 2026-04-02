@@ -5,6 +5,7 @@ use App\Http\Controllers\Backend\AdmissionController;
 use App\Http\Controllers\Backend\AttendanceController;
 use App\Http\Controllers\Backend\ClassRoutineController;
 use App\Http\Controllers\Backend\ClassroomController;
+use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\ExamController;
 use App\Http\Controllers\Backend\FeeStructureController;
 use App\Http\Controllers\Backend\FeeTypeController;
@@ -27,11 +28,15 @@ Route::get('/', function () {
     return redirect('/dashboard');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/admin/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+    Route::get('/teacher/dashboard', [DashboardController::class, 'teacher'])->name('teacher.dashboard');
+    Route::get('/student/dashboard', [DashboardController::class, 'student'])->name('student.dashboard');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

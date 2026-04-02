@@ -35,7 +35,7 @@ class PaymentController extends Controller
         return view('backend.payments.index', compact('payments'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $invoices = Invoice::with('student')
             ->whereIn('status', ['issued', 'partial', 'unpaid'])
@@ -43,7 +43,14 @@ class PaymentController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('backend.payments.create', compact('invoices'));
+        $selectedInvoice = null;
+        if ($request->has('invoice_id') && $request->invoice_id) {
+            $selectedInvoice = Invoice::with(['student', 'class', 'items.feeType', 'payments'])
+                ->where('id', $request->invoice_id)
+                ->first();
+        }
+
+        return view('backend.payments.create', compact('invoices', 'selectedInvoice'));
     }
 
     public function getInvoice(Request $request)

@@ -25,12 +25,33 @@
                     <select name="invoice_id" id="invoiceSelect" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         <option value="">Select Invoice</option>
                         @foreach($invoices as $invoice)
-                            <option value="{{ $invoice->id }}" data-due="{{ $invoice->due_amount }}">
+                            <option value="{{ $invoice->id }}" data-due="{{ $invoice->due_amount }}" {{ $selectedInvoice && $selectedInvoice->id == $invoice->id ? 'selected' : '' }}>
                                 {{ $invoice->invoice_number }} - {{ $invoice->student->first_name ?? '' }} {{ $invoice->student->last_name ?? '' }} (Due: {{ number_format($invoice->due_amount, 2) }})
                             </option>
                         @endforeach
                     </select>
                 </div>
+
+                @if($selectedInvoice)
+                <input type="hidden" id="preselectedDue" value="{{ $selectedInvoice->due_amount }}">
+                <div id="preselectedDetails" class="bg-gray-50 rounded-lg p-4 md:col-span-2">
+                    <h3 class="font-medium text-gray-800 mb-2">Invoice Details</h3>
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Student:</span>
+                            <span class="font-medium">{{ $selectedInvoice->student->first_name ?? '' }} {{ $selectedInvoice->student->last_name ?? '' }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Class:</span>
+                            <span class="font-medium">{{ $selectedInvoice->class->name ?? 'N/A' }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Due Amount:</span>
+                            <span class="font-medium text-red-600">{{ number_format($selectedInvoice->due_amount, 2) }}</span>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Amount *</label>
@@ -101,24 +122,35 @@
 
 @push('scripts')
 <script>
-document.getElementById('invoiceSelect').addEventListener('change', function() {
-    const option = this.options[this.selectedIndex];
-    const dueAmount = option.dataset.due;
-    
-    if (dueAmount) {
-        document.getElementById('amount').value = dueAmount;
-        document.getElementById('invoiceDetails').classList.remove('hidden');
-        
-        const text = option.text;
-        const parts = text.split(' - ');
-        if (parts.length >= 2) {
-            document.getElementById('detailStudent').textContent = parts[1].split(' (Due:')[0];
+document.addEventListener('DOMContentLoaded', function() {
+    const preselectedDue = document.getElementById('preselectedDue');
+    if (preselectedDue) {
+        const select = document.getElementById('invoiceSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            document.getElementById('amount').value = preselectedDue.value;
         }
-        document.getElementById('detailDue').textContent = dueAmount;
-    } else {
-        document.getElementById('amount').value = '';
-        document.getElementById('invoiceDetails').classList.add('hidden');
     }
+
+    document.getElementById('invoiceSelect').addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        const dueAmount = option.dataset.due;
+        
+        if (dueAmount) {
+            document.getElementById('amount').value = dueAmount;
+            document.getElementById('invoiceDetails').classList.remove('hidden');
+            
+            const text = option.text;
+            const parts = text.split(' - ');
+            if (parts.length >= 2) {
+                document.getElementById('detailStudent').textContent = parts[1].split(' (Due:')[0];
+            }
+            document.getElementById('detailDue').textContent = dueAmount;
+        } else {
+            document.getElementById('amount').value = '';
+            document.getElementById('invoiceDetails').classList.add('hidden');
+        }
+    });
 });
 </script>
 @endpush
