@@ -87,7 +87,12 @@ document.getElementById('loadStudents').addEventListener('click', function() {
     if (sectionId) url.searchParams.append('section_id', sectionId);
     if (date) url.searchParams.append('date', date);
 
-    fetch(url)
+    fetch(url, {
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        }
+    })
         .then(res => res.json())
         .then(data => {
             const tbody = document.getElementById('studentsList');
@@ -112,6 +117,10 @@ document.getElementById('loadStudents').addEventListener('click', function() {
                 </tr>
             `).join('');
             document.getElementById('studentsSection').classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load students. Please try again.');
         });
 });
 
@@ -136,7 +145,12 @@ document.getElementById('classSelect').addEventListener('change', function() {
         return;
     }
     
-    fetch('/classrooms/' + classId + '/sections-list')
+    fetch('/classrooms/' + classId + '/sections-list', {
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        }
+    })
         .then(res => res.json())
         .then(data => {
             sectionSelect.innerHTML = '<option value="">All Sections</option>';
