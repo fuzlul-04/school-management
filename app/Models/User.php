@@ -73,6 +73,11 @@ class User extends Authenticatable
         return $this->hasMany(AuditLog::class);
     }
 
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');

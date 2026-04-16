@@ -3,8 +3,8 @@
 use App\Http\Controllers\Backend\AcademicYearController;
 use App\Http\Controllers\Backend\AdmissionController;
 use App\Http\Controllers\Backend\AttendanceController;
-use App\Http\Controllers\Backend\ClassRoutineController;
 use App\Http\Controllers\Backend\ClassroomController;
+use App\Http\Controllers\Backend\ClassRoutineController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\ExamController;
 use App\Http\Controllers\Backend\FeeStructureController;
@@ -22,6 +22,16 @@ use App\Http\Controllers\Backend\TeacherClassController;
 use App\Http\Controllers\Backend\TeacherController;
 use App\Http\Controllers\Backend\TeacherSubjectController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Student\CourseContentController;
+use App\Http\Controllers\Student\LiveClassController;
+use App\Http\Controllers\Student\LiveExamController;
+use App\Http\Controllers\Student\PastClassController;
+use App\Http\Controllers\Student\PastExamController;
+use App\Http\Controllers\Student\PaymentController as StudentPaymentController;
+use App\Http\Controllers\Student\PerformanceController;
+use App\Http\Controllers\Student\PracticeExamController;
+use App\Http\Controllers\Student\QnaController;
+use App\Http\Controllers\Student\SolveSheetController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -61,7 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('classrooms/{classroom}/sections/{section}', [ClassroomController::class, 'updateSection'])->name('classrooms.sections.update');
     Route::delete('classrooms/{classroom}/sections/{section}', [ClassroomController::class, 'destroySection'])->name('classrooms.sections.destroy');
     Route::get('classrooms/{classroom}/sections-list', [ClassroomController::class, 'getSections'])->name('classrooms.sections');
-    
+
     Route::resource('students', StudentController::class)->names('students');
     Route::post('students/{student}/upload-image', [StudentController::class, 'uploadImage'])->name('students.upload-image');
     Route::post('students/{student}/assign-guardian', [StudentController::class, 'assignGuardian'])->name('students.assign-guardian');
@@ -81,34 +91,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('admissions/{student}/show-info', [AdmissionController::class, 'showInfo'])->name('admissions.show-info');
     Route::post('admissions/{student}/enroll', [AdmissionController::class, 'enroll'])->name('admissions.enroll');
     Route::post('admissions/{admission}/convert', [AdmissionController::class, 'convertToStudent'])->name('admissions.convert');
-    
+
     Route::resource('teachers', TeacherController::class)->names('teachers');
-    
+
     Route::resource('subjects', SubjectController::class)->names('subjects');
     Route::post('subjects/assign-class', [SubjectController::class, 'assignClass'])->name('subjects.assign-class');
     Route::delete('subjects/remove-class', [SubjectController::class, 'removeClass'])->name('subjects.remove-class');
-    
+
     Route::resource('teacher-subjects', TeacherSubjectController::class)->names('teacher-subjects');
     Route::resource('teacher-classes', TeacherClassController::class)->names('teacher-classes');
     Route::get('teacher-classes/sections/{classId}', [TeacherClassController::class, 'getSections'])->name('teacher-classes.sections');
     Route::get('teacher-classes/subjects/{classId}', [TeacherClassController::class, 'getSubjects'])->name('teacher-classes.subjects');
-    
+
     Route::get('class-routines/timetable', [ClassRoutineController::class, 'timetable'])->name('class-routines.timetable');
     Route::get('class-routines/sections/{classId}', [ClassRoutineController::class, 'getSections'])->name('class-routines.sections');
     Route::resource('class-routines', ClassRoutineController::class)->names('class-routines');
-    
+
     Route::get('attendances/mark', [AttendanceController::class, 'markAttendance'])->name('attendances.mark');
     Route::post('attendances/mark', [AttendanceController::class, 'storeAttendance'])->name('attendances.store-mark');
     Route::get('attendances/students', [AttendanceController::class, 'getStudentsByClass'])->name('attendances.students');
-    
+
     Route::get('attendances/reports/monthly', [AttendanceController::class, 'monthlyReport'])->name('attendances.reports.monthly');
     Route::get('attendances/reports/absentees', [AttendanceController::class, 'absenteeList'])->name('attendances.reports.absentees');
     Route::get('attendances/reports/export', [AttendanceController::class, 'exportPDF'])->name('attendances.reports.export');
-    
+
     Route::resource('attendances', AttendanceController::class)->names('attendances');
     Route::get('attendances/get-students', [AttendanceController::class, 'getStudents'])->name('attendances.get-students');
     Route::post('attendances/bulk', [AttendanceController::class, 'bulkStore'])->name('attendances.bulk');
-    
+
     Route::resource('exams', ExamController::class)->names('exams');
     Route::get('exams/{exam}/marks-entry', [ExamController::class, 'marksEntry'])->name('exams.marks-entry');
     Route::post('exams/{exam}/marks-entry', [ExamController::class, 'saveMarks'])->name('exams.save-marks');
@@ -121,28 +131,64 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('results/{result}', [ResultController::class, 'show'])->name('results.show');
     Route::get('results/{result}/pdf', [ResultController::class, 'exportPDF'])->name('results.export-pdf');
     Route::get('results/export/all', [ResultController::class, 'exportAllResults'])->name('results.export-all');
-    
+
     Route::resource('fee-types', FeeTypeController::class)->names('fee-types');
-    
+
     Route::resource('fee-structures', FeeStructureController::class)->names('fee-structures');
-    
+
     Route::get('invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.generate');
     Route::post('invoices/generate-preview', [InvoiceController::class, 'generatePreview'])->name('invoices.generate-preview');
     Route::post('invoices/generate', [InvoiceController::class, 'generateStore'])->name('invoices.generate-store');
     Route::get('invoices/students/{classId}', [InvoiceController::class, 'getStudents'])->name('invoices.students');
     Route::get('invoices/fee-structure', [InvoiceController::class, 'getFeeStructure'])->name('invoices.fee-structure');
     Route::get('invoices/fee-amount/{feeTypeId}/{classId}/{academicYearId}', [InvoiceController::class, 'getFeeAmount'])->name('invoices.fee-amount');
-    
+
     Route::resource('invoices', InvoiceController::class)->names('invoices');
-    
+
     Route::resource('payments', PaymentController::class)->names('payments');
     Route::get('payments/invoice/{invoice}', [PaymentController::class, 'getInvoice'])->name('payments.invoice');
-    
+
     Route::get('finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::get('finance/due-invoices', [FinanceController::class, 'dueInvoices'])->name('finance.due-invoices');
     Route::get('finance/student-summary', [FinanceController::class, 'studentSummary'])->name('finance.student-summary');
     Route::get('finance/student/{student}', [FinanceController::class, 'studentDetail'])->name('finance.student-detail');
     Route::get('finance/reports', [FinanceController::class, 'reports'])->name('finance.reports');
+
+    Route::prefix('student')->name('student.')->group(function () {
+        Route::get('live-classes', [LiveClassController::class, 'index'])->name('live-class');
+
+        Route::get('live-exams', [LiveExamController::class, 'index'])->name('live-exams.index');
+        Route::get('live-exams/{exam}/take', [LiveExamController::class, 'show'])->name('live-exams.take');
+        Route::post('live-exams/{exam}/submit', [LiveExamController::class, 'submit'])->name('live-exams.submit');
+        Route::get('live-exams/results', [LiveExamController::class, 'results'])->name('live-exams.results');
+
+        Route::get('course-content', [CourseContentController::class, 'index'])->name('course-content');
+        Route::post('course-content/{content}/complete', [CourseContentController::class, 'markComplete'])->name('course-content.complete');
+
+        Route::get('past-classes', [PastClassController::class, 'index'])->name('past-classes');
+        Route::post('past-classes/{id}/bookmark', [PastClassController::class, 'toggleBookmark'])->name('past-classes.bookmark');
+
+        Route::get('past-exams', [PastExamController::class, 'index'])->name('past-exams.index');
+        Route::get('past-exams/{result}', [PastExamController::class, 'show'])->name('past-exams.show');
+
+        Route::get('practice-exam', [PracticeExamController::class, 'index'])->name('practice-exam.index');
+        Route::post('practice-exam/start', [PracticeExamController::class, 'start'])->name('practice-exam.start');
+        Route::post('practice-exam/submit', [PracticeExamController::class, 'submit'])->name('practice-exam.submit');
+
+        Route::get('solve-sheets', [SolveSheetController::class, 'index'])->name('solve-sheets');
+        Route::get('solve-sheets/{sheet}/download', [SolveSheetController::class, 'download'])->name('solve-sheets.download');
+
+        Route::get('qna', [QnaController::class, 'index'])->name('qna.index');
+        Route::get('qna/create', [QnaController::class, 'create'])->name('qna.create');
+        Route::post('qna', [QnaController::class, 'store'])->name('qna.store');
+        Route::get('qna/{question}', [QnaController::class, 'show'])->name('qna.show');
+
+        Route::get('performance', [PerformanceController::class, 'index'])->name('performance');
+
+        Route::get('payments', [StudentPaymentController::class, 'index'])->name('payments');
+        Route::post('payments/{payment}/pay', [StudentPaymentController::class, 'pay'])->name('payments.pay');
+        Route::get('payments/{payment}/receipt', [StudentPaymentController::class, 'downloadReceipt'])->name('payments.receipt');
+    });
 });
 
 require __DIR__.'/auth.php';

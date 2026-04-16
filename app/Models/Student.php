@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Student extends Model
 {
     use SoftDeletes;
+
     protected $fillable = [
         'user_id', 'academic_year_id', 'class_id', 'section_id', 'student_id',
         'first_name', 'last_name', 'bangla_name', 'date_of_birth', 'birth_certificate_number',
@@ -78,9 +79,39 @@ class Student extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function liveExamResults(): HasMany
+    {
+        return $this->hasMany(ExamResult::class);
+    }
+
+    public function contentProgress(): HasMany
+    {
+        return $this->hasMany(StudentContentProgress::class);
+    }
+
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(StudentBookmark::class);
+    }
+
+    public function practiceResults(): HasMany
+    {
+        return $this->hasMany(PracticeResult::class);
+    }
+
+    public function qnaQuestions(): HasMany
+    {
+        return $this->hasMany(QnaQuestion::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(StudentPayment::class);
+    }
+
     public function getFullNameAttribute(): string
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name.' '.$this->last_name;
     }
 
     public function scopeActive($query)
